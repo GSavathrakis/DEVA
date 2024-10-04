@@ -56,6 +56,7 @@ for si, stage in enumerate(stages_to_perform):
     # Batch size and num_workers are both effective,
     # so we get the per-process number by dividing the total with num. processes
     num_gpus = world_size
+
     if config['batch_size'] // num_gpus * num_gpus != config['batch_size']:
         raise ValueError(
             f'Batch size ({config["batch_size"]}) must be divisible by # GPUs ({num_gpus}).')
@@ -129,6 +130,7 @@ for si, stage in enumerate(stages_to_perform):
 
     def renew_vos_loader(max_skip):
         # //5 because we only have annotation for every five frames
+        """
         yv_dataset = VOSDataset(
             path.join(yv_root, 'JPEGImages'),
             path.join(yv_root, 'Annotations'),
@@ -137,6 +139,7 @@ for si, stage in enumerate(stages_to_perform):
             num_frames=config['num_frames'],
             data_ratio=config['video_data_ratio'],
         )
+        """
         davis_dataset = VOSDataset(
             path.join(davis_root, 'JPEGImages', '480p'),
             path.join(davis_root, 'Annotations', '480p'),
@@ -145,6 +148,7 @@ for si, stage in enumerate(stages_to_perform):
             num_frames=config['num_frames'],
             data_ratio=config['video_data_ratio'],
         )
+        """
         ovis_dataset = VOSDataset(
             path.join(ovis_root, 'JPEGImages'),
             path.join(ovis_root, 'Annotations'),
@@ -153,11 +157,13 @@ for si, stage in enumerate(stages_to_perform):
             num_frames=config['num_frames'],
             data_ratio=config['video_data_ratio'],
         )
-        train_dataset = ConcatDataset([davis_dataset] * 5 + [yv_dataset] + [ovis_dataset] * 3)
+        """
+        #train_dataset = ConcatDataset([davis_dataset] * 5 + [yv_dataset] + [ovis_dataset] * 3)
+        train_dataset = ConcatDataset([davis_dataset])
 
-        print(f'YouTube dataset size: {len(yv_dataset)}')
+        #print(f'YouTube dataset size: {len(yv_dataset)}')
         print(f'DAVIS dataset size: {len(davis_dataset)}')
-        print(f'OVIS dataset size: {len(ovis_dataset)}')
+        #print(f'OVIS dataset size: {len(ovis_dataset)}')
         print(f'Concat dataset size: {len(train_dataset)}')
         print(f'Renewed with {max_skip=}')
 
@@ -186,15 +192,16 @@ for si, stage in enumerate(stages_to_perform):
         # stage 3, VOS datasets
         max_skip_values = [10, 15, 5, 5]
         increase_skip_fraction = [0.1, 0.3, 0.8, 100]
-        yv_root = path.join(path.expanduser(config['yv_root']), 'train')
+        #yv_root = path.join(path.expanduser(config['yv_root']), 'train')
         davis_root = path.join(path.expanduser(config['davis_root']), '2017', 'trainval')
-        ovis_root = path.expanduser(config['ovis_root'])
+        #ovis_root = path.expanduser(config['ovis_root'])
 
         train_sampler, train_loader = renew_vos_loader(5)
         renew_loader = renew_vos_loader
     """
     Determine max epoch
     """
+    print(len(train_loader))
     total_epoch = math.ceil(config['iterations'] / len(train_loader))
     current_epoch = total_iter // len(train_loader)
     print(f'We approximately use {total_epoch} epochs.')
@@ -220,6 +227,10 @@ for si, stage in enumerate(stages_to_perform):
             # Train loop
             model.train()
             for data in train_loader:
+                print(data['rgb'].shape)
+                print(data['first_frame_gt'].shape)
+                print(data['cls_gt'].shape)
+                print(data['info'])
                 # Update skip if needed
                 if stage != '0' and total_iter >= change_skip_iter[0]:
                     while total_iter >= change_skip_iter[0]:
@@ -235,6 +246,7 @@ for si, stage in enumerate(stages_to_perform):
 
                 model.do_pass(data, total_iter)
                 total_iter += 1
+                break
 
                 if total_iter >= config['iterations']:
                     break

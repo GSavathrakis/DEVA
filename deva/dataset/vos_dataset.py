@@ -75,8 +75,7 @@ class VOSDataset(Dataset):
                                     fill=im_mean),
             transforms.RandomResizedCrop((self.size, self.size),
                                          scale=(0.16, 2.0),
-                                         interpolation=InterpolationMode.BILINEAR,
-                                         antialias=True)
+                                         interpolation=InterpolationMode.BILINEAR)
         ])
 
         self.all_gt_dual_transform = transforms.Compose([

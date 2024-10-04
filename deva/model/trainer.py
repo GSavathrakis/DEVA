@@ -15,6 +15,8 @@ from deva.model.losses import LossComputer
 from deva.utils.log_integrator import Integrator
 from deva.utils.image_saver import pool_pairs
 
+import matplotlib.pyplot as plt
+
 
 class Trainer:
     def __init__(self, config, logger=None, save_path=None, local_rank=0, world_size=1):
@@ -99,6 +101,10 @@ class Trainer:
             keys = k.unsqueeze(2)
             shrinkages = s.unsqueeze(2)
             values = v16.unsqueeze(3)  # B*num_objects*C*T*H*W
+
+            #self.plot_figure(frames[0][0].permute(1,2,0).cpu().detach().numpy())
+            #self.plot_figure(frames[0][1].permute(1,2,0).cpu().detach().numpy())
+            #self.plot_figure(frames[0][2].permute(1,2,0).cpu().detach().numpy())
 
             for ti in range(1, self.num_frames):
                 ms_features, feat = self.DEVA('encode_image', frames[:, ti])
@@ -261,6 +267,12 @@ class Trainer:
 
         self.load_network_in_memory(src_dict)
         print(f'Network weight loaded from {path}')
+    
+    def plot_figure(self, image):
+        plt.figure()
+        plt.imshow(image)
+        plt.axis('off')
+        plt.show()
 
     def train(self):
         self._is_train = True

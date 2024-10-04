@@ -14,12 +14,12 @@ class Configuration():
         parser.add_argument('--static_root', help='Static training data root', default='../static')
         parser.add_argument('--bl_root', help='Blender training data root', default='../BL30K')
         parser.add_argument('--yv_root', help='YouTubeVOS data root', default='../YouTube')
-        parser.add_argument('--davis_root', help='DAVIS data root', default='../DAVIS')
+        parser.add_argument('--davis_root', help='DAVIS data root', default='../DAVIS_small')
         parser.add_argument('--ovis_root', help='OVIS data root', default='../OVIS-VOS-train')
         parser.add_argument('--num_workers',
                             help='Total number of dataloader workers across all GPUs processes',
                             type=int,
-                            default=16)
+                            default=8)
         parser.add_argument('--video_data_ratio', default=1.0, type=float)
 
         parser.add_argument('--pix_feat_dim', default=512, type=int)
@@ -42,7 +42,7 @@ class Configuration():
         Batch sizes are effective -- you don't have to scale them when you scale the number processes
         """
         # Stage 0, static images
-        parser.add_argument('--s0_batch_size', default=16, type=int)
+        parser.add_argument('--s0_batch_size', default=2, type=int)
         parser.add_argument('--s0_iterations', default=80000, type=int)
         parser.add_argument('--s0_steps', nargs="*", default=[], type=int)
         parser.add_argument('--s0_lr', help='Initial learning rate', default=2e-5, type=float)
@@ -53,7 +53,7 @@ class Configuration():
         parser.add_argument('--s0_schedule', default='constant')
 
         # Stage 3, DAVIS+YoutubeVOS+OVIS
-        parser.add_argument('--s3_batch_size', default=16, type=int)
+        parser.add_argument('--s3_batch_size', default=2, type=int)
         parser.add_argument('--s3_iterations', default=150000, type=int)
         parser.add_argument('--s3_steps', nargs="*", default=[120000, 140000], type=int)
         parser.add_argument('--s3_lr', help='Initial learning rate', default=1e-5, type=float)
